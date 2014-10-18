@@ -18,21 +18,17 @@ module Propono
       Propono.config.queue_suffix = ""
     end
 
-    def test_subscribe_by_queue_calls_subscribe
+    def test_subscribe_calls_queue_listener
       topic = 'foobar'
-      Subscriber.expects(:subscribe_by_queue).with(topic)
-      Propono.subscribe_by_queue(topic)
-    end
-
-    def test_subscribe_by_post_calls_subscribe
-      topic, endpoint = 'foo', 'bar'
-      Subscriber.expects(:subscribe_by_post).with(topic, endpoint)
-      Propono.subscribe_by_post(topic, endpoint)
-    end
-
-    def test_listen_to_queue_calls_queue_listener
-      topic = 'foobar'
+      block = Proc.new {}
       QueueListener.expects(:listen).with(topic)
+      Propono.subscribe(topic)
+    end
+
+    def test_listen_to_queue_calls_subscribe
+      topic = 'foobar'
+      block = Proc.new {}
+      Propono.expects(:subscribe).with(topic)
       Propono.listen_to_queue(topic)
     end
 

@@ -1,3 +1,10 @@
+* 2.0.0
+ [FEATURE] Rename `Propono.listen_to_queue` to `Propono.subscribe`
+ [FEATURE] Move to the official AWS gems
+ [FEATURE] Use long polling when listening for messages.
+ [FEATURE] Remove `Propono.subscribe_by_queue`
+ [FEATURE] Remove `Propono.subscribe_by_post`
+
 # 1.3.0 / 2014-07-12
 * [FEATURE] Add {async: false} option to publisher
 

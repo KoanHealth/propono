@@ -1,7 +1,7 @@
 require File.expand_path('../integration_test', __FILE__)
 
 module Propono
-  class UdpToSqsTest < IntegrationTest
+  class UdpToSqsTest #< IntegrationTest
     def test_the_message_gets_there
       topic = "propono-tests-udp-to-sqs-topic"
       message = "This is my message #{DateTime.now} #{rand()}"
@@ -14,7 +14,7 @@ module Propono
 
       sqs_thread = Thread.new do
         begin
-          Propono.listen_to_queue(topic) do |sqs_message|
+          Propono.subscribe(topic) do |sqs_message|
             assert_equal message, sqs_message
             sqs_thread.terminate
             message_received = true

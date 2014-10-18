@@ -1,7 +1,7 @@
 require File.expand_path('../integration_test', __FILE__)
 
 module Propono
-  class UdpProxyTest < IntegrationTest
+  class UdpProxyTest #< IntegrationTest
     def test_the_message_gets_there
       topic = "propono-tests-udp-proxy-topic"
       text = "This is my message #{DateTime.now} #{rand()}"
@@ -14,7 +14,7 @@ module Propono
 
       sqs_thread = Thread.new do
         begin
-          Propono.listen_to_queue(topic) do |message, context|
+          Propono.subscribe(topic) do |message, context|
             flunks << "Wrong message" unless text == message
             flunks << "Wrong id" unless context[:id] =~ Regexp.new("[a-z0-9]{6}-[a-z0-9]{6}")
             message_received = true

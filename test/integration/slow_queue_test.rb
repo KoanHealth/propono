@@ -1,7 +1,7 @@
 require File.expand_path('../integration_test', __FILE__)
 
 module Propono
-  class SlowQueueTest < IntegrationTest
+  class SlowQueueTest #< IntegrationTest
     def test_slow_messages_are_received
       topic = "propono-tests-slow-queue-topic"
       slow_topic = "propono-tests-slow-queue-topic-slow"
@@ -15,7 +15,7 @@ module Propono
 
       thread = Thread.new do
         begin
-          Propono.listen_to_queue(topic) do |message, context|
+          Propono.subscribe(topic) do |message, context|
             flunks << "Wrong message" unless (message == text || message == slow_text)
             message_received = true if message == text
             slow_message_received = true if message == slow_text

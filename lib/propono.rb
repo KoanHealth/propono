@@ -1,6 +1,9 @@
 # Propono
 #
 # Propono is a pub/sub gem built on top of Amazon Web Services (AWS). It uses Simple Notification Service (SNS) and Simple Queue Service (SQS) to seamlessly pass messages throughout your infrastructure.
+require 'aws-sdk-core'
+require 'aws-sdk-resources'
+
 require "propono/version"
 require 'propono/propono_error'
 require 'propono/logger'
@@ -8,20 +11,19 @@ require 'propono/configuration'
 
 require "propono/helpers/hash"
 
-require 'propono/components/aws_config'
-require 'propono/components/sns'
-require 'propono/components/sqs'
-require "propono/components/queue"
-require "propono/components/topic"
-require "propono/components/post_subscription"
-require "propono/components/queue_subscription"
-require "propono/components/sqs_message"
+require 'propono/aws_wrapper/aws_config'
+require 'propono/aws_wrapper/sns'
+require 'propono/aws_wrapper/sns_topic'
+require 'propono/aws_wrapper/sqs'
+require 'propono/aws_wrapper/sqs_queue'
+require "propono/aws_wrapper/sqs_message"
+require "propono/aws_wrapper/queue_set"
 
-require "propono/services/publisher"
-require "propono/services/queue_creator"
+require "propono/services/message_processor"
+
+require "propono/services/queue_drainer"
 require "propono/services/queue_listener"
-require "propono/services/subscriber"
-require "propono/services/topic_creator"
+require "propono/services/publisher"
 require "propono/services/udp_listener"
 require "propono/services/tcp_listener"
 
@@ -73,38 +75,23 @@ module Propono
     Publisher.publish(suffixed_topic, message, options)
   end
 
-  # Creates a new SNS-SQS subscription on the specified topic.
-  #
-  # This is implicitly called by {#listen_to_queue}.
-  #
-  # @param [String] topic The name of the topic to subscribe to.
-  def self.subscribe_by_queue(topic)
-    Subscriber.subscribe_by_queue(topic)
-  end
-
-  # Creates a new SNS-POST subscription on the specified topic.
-  #
-  # The POST currently needs confirming before the subscription
-  # can be published to.
-  #
-  # @param [String] topic The name of the topic to subscribe to.
-  def self.subscribe_by_post(topic, endpoint)
-    Subscriber.subscribe_by_post(topic, endpoint)
-  end
-
   # Listens on a queue and yields for each message
   #
   # Calling this will enter a queue-listening loop that
   # yields the message_processor for each messages.
   #
   # This method will automatically create a subscription if
-  # one does not exist, so there is no need to call
-  # <tt>subscribe_by_queue</tt> in addition.
+  # one does not exist.
   #
   # @param [String] topic The topic to subscribe to.
   # @param &message_processor The block to yield for each message.
-  def self.listen_to_queue(topic, &message_processor)
-    QueueListener.listen(topic, &message_processor)
+  def self.subscribe(topic_name, &message_processor)
+    QueueListener.listen(topic_name, &message_processor)
+  end
+
+  def self.listen_to_queue(topic, &block)
+    Propono.config.logger.info("Propono.listen_to_queue is deprecated and will be removed in 2.1. Please use Propono.subscribe")
+    Propono.subscribe(topic, &block)
   end
 
   # Listens on a queue and yields for each message
@@ -114,8 +101,7 @@ module Propono
   # loop will end when all messages have been processed.
   #
   # This method will automatically create a subscription if
-  # one does not exist, so there is no need to call
-  # <tt>subscribe_by_queue</tt> in addition.
+  # one does not exist.
   #
   # @param [String] topic The topic to subscribe to.
   # @param &message_processor The block to yield for each message.

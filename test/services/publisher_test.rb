@@ -16,8 +16,11 @@ module Propono
     end
 
     def test_initializer_generates_an_id
-      publisher = Publisher.new('x','y')
-      assert publisher.instance_variable_get(:@id)
+      id = "21312421"
+      SecureRandom.stubs(:hex).returns(id)
+      publisher = Publisher.new(mock,mock)
+
+      assert_equal id, publisher.instance_variable_get(:@id)
     end
 
     def test_initializer_concats_an_id
@@ -39,8 +42,8 @@ module Propono
     def test_publish_logs
       publisher = Publisher.new("foo", "bar")
       publisher.instance_variable_set(:@id, 'abc')
-      Propono.config.logger.expects(:info).with() {|x| x =~ /^Propono \[abc\]: Publishing bar to foo via sns.*/}
-      publisher.send(:publish)
+      Propono.config.logger.expects(:info).with {|x| x =~ /^Propono \[abc\]: Publishing bar to foo via sns.*/}
+      publisher.publish
     end
 
     def test_publish_proxies_to_sns
@@ -56,81 +59,54 @@ module Propono
     end
 
     def test_publish_via_sns_should_call_sns_on_correct_topic_and_message
-      topic = "topic123"
+      topic_name = "topic123"
       id = "f123"
       message = "message123"
-      topic_arn = "arn123"
-      topic = Topic.new(topic_arn)
 
-      TopicCreator.stubs(find_or_create: topic)
+      aws_object = mock
+      topic = mock
+      Propono::SNS.stubs(get_topic: topic)
 
-      sns = mock()
-      sns.expects(:publish).with(topic_arn, {id: id, message: message}.to_json)
-      publisher = Publisher.new(topic, message)
-      publisher.stubs(id: id, sns: sns)
-      thread = publisher.send(:publish_via_sns)
-      thread.join
+      publisher = Publisher.new(topic_name, message)
+      publisher.stubs(id: id, async: false)
+
+      topic.expects(:publish).with({id: id, message: message}.to_json)
+      publisher.send(:publish_via_sns)
     end
 
     def test_publish_via_sns_should_accept_a_hash_for_message
-      topic = "topic123"
+      topic_name = "topic123"
       id = "foobar123"
       message = {something: ['some', 123, true]}
       body = {id: id, message: message}
 
-      topic_arn = "arn123"
-      topic = Topic.new(topic_arn)
-      TopicCreator.stubs(find_or_create: topic)
+      topic = mock
+      Propono::SNS.stubs(get_topic: topic)
 
-      sns = mock()
-      sns.expects(:publish).with(topic_arn, body.to_json)
-      publisher = Publisher.new(topic, message)
-      publisher.stubs(id: id, sns: sns)
-      thread = publisher.send(:publish_via_sns)
-      thread.join
+      publisher = Publisher.new(topic, message, async: false)
+      publisher.stubs(id: id)
+
+      topic.expects(:publish).with(body.to_json)
+      publisher.send(:publish_via_sns)
     end
 
-    def test_publish_via_sns_should_return_future_of_the_sns_response
-      topic = "topic123"
-      id = "foobar123"
-      message = "message123"
-      body = {id: id, message: message}
+    def test_publish_via_sns_should_return_id_of_the_sns_message
+      message_id = "foasdas"
 
-      topic_arn = "arn123"
-      topic = Topic.new(topic_arn)
-      TopicCreator.stubs(find_or_create: topic)
+      topic = mock
+      topic.stubs(:publish).returns(message_id)
+      Propono::SNS.stubs(get_topic: topic)
 
-      sns = mock()
-      sns.expects(:publish).with(topic_arn, body.to_json).returns(:response)
-      publisher = Publisher.new(topic, message)
-      publisher.stubs(id: id, sns: sns)
-      assert_same :response, publisher.send(:publish_via_sns).value
-    end
-
-    def test_publish_via_sns_should_propogate_exception_on_topic_creation_error
-      TopicCreator.stubs(:find_or_create).raises(TopicCreatorError)
-
-      assert_raises(TopicCreatorError) do
-        publisher = Publisher.new("topic", "message")
-        thread = publisher.send(:publish_via_sns)
-        thread.join
-      end
+      publisher = Publisher.new(topic, message, async: false)
+      assert_equal message_id, publisher.send(:publish_via_sns)
     end
 
     def test_publish_via_sns_creates_a_topic
-      topic_id = "Malcs_topic_id"
-      topic_arn = "Malcs_topic_arn"
-      topic = Topic.new(topic_arn)
-
-      TopicCreator.expects(:find_or_create).with(topic_id).returns(topic)
-
-      sns = mock()
-      sns.stubs(:publish)
-      publisher = Publisher.new(topic_id, "Foobar")
-      publisher.stubs(sns: sns)
-
-      thread = publisher.send(:publish_via_sns)
-      thread.join
+      topic_name = "Malcs_topic_id"
+      topic = mock(:publish)
+      Propono::SNS.expects(:get_topic).with(topic_name).returns(topic)
+      publisher = Publisher.new(topic_name, "Foobar", async: false)
+      publisher.send(:publish_via_sns)
     end
 
     def test_udp_uses_correct_message_host_and_port

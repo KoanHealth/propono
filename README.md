@@ -10,7 +10,7 @@ It's beautifully simple to use.
 
 ```ruby
 # On Machine A
-Propono.listen_to_queue('some-topic') do |message|
+Propono.subscribe('some-topic') do |message|
   puts "I just received: #{message}"
 end
 
@@ -57,7 +57,7 @@ Listening for messages is easy too. Just tell Propono what your application is c
 
 ```ruby
 Propono.config.application_name = "application-name" # Something unique to this app.
-Propono.listen_to_queue('some-topic') do |message|
+Propono.subscribe('some-topic') do |message|
   # ... Do something interesting with the message
 end
 ```
@@ -149,7 +149,17 @@ end
 
 These can all also be set using the `Propono.config.access_key = "..."` syntax.
 
-### Is it any good?
+## Migrating from v1 to v2
+
+### Architecture Changes
+- Propono is now underwritten by the official AWS gem, not Fog.
+- We now use long polling when listening for messages.
+
+### API Changes
+- `Propono.listen_to_queue` is now `Propono.subscribe`
+
+
+## Is it any good?
 
 [Yes.](http://news.ycombinator.com/item?id=3067434)
 
