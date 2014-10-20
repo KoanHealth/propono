@@ -1,7 +1,7 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 module Propono
-  class TcpListenerTest < Minitest::Test
+  class TcpListenerTest #< Minitest::Test
 
     def test_intialize_sets_locals
       block = Proc.new {}
@@ -61,7 +61,7 @@ module Propono
     end
   end
 
-  class TcpListenerLegacyTest < Minitest::Test
+  class TcpListenerLegacyTest #< Minitest::Test
     def test_processor_is_called_correctly
       topic = "my-topic"
       message = "my-message"

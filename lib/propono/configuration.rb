@@ -15,11 +15,17 @@ module Propono
     ]
     attr_writer *SETTINGS
 
-    def initialize
+    def initialize(settings = {})
       self.logger = Propono::Logger.new
       self.queue_suffix = ""
       self.use_iam_profile = false
       self.max_retries = 0
+
+      #settings.each do |key, value|
+      #  if SETTINGS.include?(key.to_sym)
+      #end
+
+      # TODO - Check we have some valid settings here...
     end
 
     SETTINGS.each do |setting|

@@ -15,16 +15,16 @@ require "propono"
 class Minitest::Test
   def setup
     super
-    Propono.config do |config|
-      config.access_key = "test-access-key"
-      config.secret_key = "test-secret-key"
-      config.queue_region = "us-east-1"
-      config.application_name = "MyApp"
+    #Propono.config do |config|
+    #  config.access_key = "test-access-key"
+    #  config.secret_key = "test-secret-key"
+    #  config.queue_region = "us-east-1"
+    #  config.application_name = "MyApp"
 
-      config.logger.stubs(:debug)
-      config.logger.stubs(:info)
-      config.logger.stubs(:error)
-    end
+    #  config.logger.stubs(:debug)
+    #  config.logger.stubs(:info)
+    #  config.logger.stubs(:error)
+    #end
   end
 end
 

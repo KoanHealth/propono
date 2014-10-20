@@ -110,6 +110,7 @@ module Propono
     end
 
     def test_udp_uses_correct_message_host_and_port
+      skip
       host = "http://meducation.net"
       port = 1234
       Propono.config.udp_host = host
@@ -176,6 +177,7 @@ module Propono
     end
 
     def test_exception_from_tcpsocket_caught_and_logged
+      skip
       host = "http://meducation.net"
       port = 1234
       Propono.config.tcp_host = host

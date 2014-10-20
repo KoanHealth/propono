@@ -1,3 +1,11 @@
+# Charles Conversation
+- Do we want TCP?
+- Do we want UDP?
+- Discuss/Test IAM
+- Do we want suffixes still?
+
+
+
 # Propono
 
 [![Build Status](https://travis-ci.org/meducation/propono.png)](https://travis-ci.org/meducation/propono)

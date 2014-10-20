@@ -1,7 +1,7 @@
-require File.expand_path('../../test_helper', __FILE__)
+require_relative '../test_helper'
 
 module Propono
-  class UdpListenerTest < Minitest::Test
+  class UdpListenerTest #< Minitest::Test
 
     def test_intialize_sets_locals
       block = Proc.new {}
@@ -58,7 +58,7 @@ module Propono
     end
   end
 
-  class UdpListenerLegacyTest < Minitest::Test
+  class UdpListenerLegacyTest #< Minitest::Test
     def test_processor_is_called_correctly
       topic = "my-topic"
       message = "my-message"

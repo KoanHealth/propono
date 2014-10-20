@@ -3,12 +3,6 @@ require_relative '../test_helper'
 module Propono
   class QueueDrainerTest < Minitest::Test
 
-    def setup
-      super
-
-      Propono.config.max_retries = 0
-    end
-
     def test_initializer_gets_topic
       topic_name = "foobar"
       topic = mock
